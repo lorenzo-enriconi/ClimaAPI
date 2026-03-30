@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clima</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0c10;
+      --surface:  #11141a;
+      --card:     #181c24;
+      --border:   #252a35;
+      --accent:   #4f8ef7;
+      --accent2:  #7dd4fc;
+      --warn:     #f7a84f;
+      --text:     #e8ecf3;
+      --muted:    #5a6175;
+      --radius:   18px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 64px;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 70% 10%, rgba(79,142,247,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 20% 80%, rgba(125,212,252,.05) 0%, transparent 60%);
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header .label {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: var(--text);
+    }
+    header h1 span { color: var(--accent); }
+
+    /* ── Search ── */
+    .search-wrap {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 48px;
+    }
+    .search-wrap input {
+      flex: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 22px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      white-space: nowrap;
+    }
+    .search-wrap button:hover { opacity: .85; }
+    .search-wrap button:active { transform: scale(.97); }
+
+    /* ── Dashboard grid ── */
+    #dashboard {
+      width: 100%;
+      max-width: 760px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeUp .5s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Hero card ── */
+    .hero-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 80% at 90% 0%, rgba(79,142,247,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-left .city {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1;
+    }
+    .hero-left .country-date {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .hero-left .description {
+      margin-top: 14px;
+      font-size: 15px;
+      color: var(--accent2);
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+    .hero-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .hero-right .temp-main {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1;
+      color: var(--text);
+    }
+    .hero-right .temp-main sup {
+      font-size: .35em;
+      vertical-align: super;
+      color: var(--accent);
+    }
+    .hero-right .feels {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .weather-icon {
+      font-size: 72px;
+      line-height: 1;
+      filter: drop-shadow(0 0 18px rgba(79,142,247,.3));
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stat-card .stat-label {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .stat-card .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+    .stat-card .stat-unit {
+      font-size: 13px;
+      color: var(--accent2);
+      font-weight: 400;
+    }
+    .stat-icon { font-size: 22px; margin-bottom: 2px; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 2px;
+    }
+
+    /* ── Forecast ── */
+    .forecast-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .forecast-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: border-color .2s;
+    }
+    .forecast-card:hover { border-color: var(--accent); }
+    .forecast-day {
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .forecast-icon { font-size: 28px; }
+    .forecast-temp {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .forecast-desc {
+      font-size: 11px;
+      color: var(--accent2);
+      text-align: center;
+      text-transform: capitalize;
+    }
+
+    /* ── Error / loader ── */
+    #error-msg {
+      display: none;
+      background: rgba(247,88,79,.08);
+      border: 1.5px solid rgba(247,88,79,.3);
+      color: #f7584f;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 14px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .loader {
+      display: none;
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 12px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 520px) {
+      .hero-card { flex-direction: column; align-items: flex-start; }
+      .hero-right { text-align: left; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .forecast-row { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <p class="label">Dashboard Meteorológico</p>
+    <h1>Clima<span>.</span></h1>
+  </header>
+
+  <div class="search-wrap">
+    <input id="input-cidade" type="text" placeholder="Digite uma cidade..." />
+    <button onclick="buscarClima()">Buscar</button>
+  </div>
+
+  <div id="error-msg"></div>
+  <div class="loader" id="loader"></div>
+
+  <div id="dashboard">
+    <!-- Hero -->
+    <div class="hero-card">
+      <div class="hero-left">
+        <div class="city" id="city-name">—</div>
+        <div class="country-date" id="country-date">—</div>
+        <div class="description" id="weather-desc">—</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <div class="weather-icon" id="weather-icon">🌡️</div>
+        <div class="hero-right">
+          <div class="temp-main" id="temp-main">—<sup>°C</sup></div>
+          <div class="feels" id="feels-like">Sensação térmica: —</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">💧</div>
+        <div class="stat-label">Umidade</div>
+        <div class="stat-value" id="humidity">—<span class="stat-unit">%</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💨</div>
+        <div class="stat-label">Vento</div>
+        <div class="stat-value" id="wind">—<span class="stat-unit"> km/h</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌡️</div>
+        <div class="stat-label">Mín / Máx</div>
+        <div class="stat-value" id="minmax" style="font-size:1.3rem">—</div>
+      </div>
+    </div>
+
+    <!-- Forecast -->
+    <p class="section-title">Previsão — próximos dias</p>
+    <div class="forecast-row" id="forecast-row"></div>
+  </div>
+
+<script>
+  const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+
+  const weatherIcons = {
+    "01d":"☀️","01n":"🌙","02d":"🌤️","02n":"🌤️",
+    "03d":"☁️","03n":"☁️","04d":"☁️","04n":"☁️",
+    "09d":"🌧️","09n":"🌧️","10d":"🌦️","10n":"🌦️",
+    "11d":"⛈️","11n":"⛈️","13d":"❄️","13n":"❄️",
+    "50d":"🌫️","50n":"🌫️"
+  };
+
+  function iconePorCodigo(codigo) {
+    return weatherIcons[codigo] || "🌡️";
+  }
+
+  function mostrarErro(msg) {
+    const el = document.getElementById("error-msg");
+    el.textContent = msg;
+    el.style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+  }
+
+  function esconderErro() {
+    document.getElementById("error-msg").style.display = "none";
+  }
+
+  async function buscarClima() {
+    const cidade = document.getElementById("input-cidade").value.trim();
+    if (!cidade) return;
+
+    esconderErro();
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+
+    try {
+      const res = await fetch(`${API_BASE}/api/clima?cidade=${encodeURIComponent(cidade)}`);
+      const data = await res.json();
+
+      if (data.erro_externo || data.erro_fatal) {
+        mostrarErro(data.erro_externo ? "Cidade não encontrada." : `Erro: ${data.erro_fatal}`);
+        return;
+      }
+
+      preencherHero(data);
+      await buscarPrevisao(cidade);
+      document.getElementById("dashboard").style.display = "flex";
+
+    } catch (e) {
+      mostrarErro("Não foi possível conectar à API. Verifique se ela está rodando.");
+    } finally {
+      document.getElementById("loader").style.display = "none";
+    }
+  }
+
+  function preencherHero(data) {
+    const now = new Date();
+    document.getElementById("city-name").textContent = data.name;
+    document.getElementById("country-date").textContent =
+      `${data.sys?.country ?? ""} · ${now.toLocaleDateString("pt-BR",{weekday:"long", day:"numeric", month:"long"})}`;
+    document.getElementById("weather-desc").textContent = data.weather?.[0]?.description ?? "";
+    document.getElementById("weather-icon").textContent = iconePorCodigo(data.weather?.[0]?.icon);
+    document.getElementById("temp-main").innerHTML = `${Math.round(data.main?.temp)}<sup>°C</sup>`;
+    document.getElementById("feels-like").textContent = `Sensação térmica: ${Math.round(data.main?.feels_like)}°C`;
+    document.getElementById("humidity").innerHTML = `${data.main?.humidity}<span class="stat-unit">%</span>`;
+    document.getElementById("wind").innerHTML = `${Math.round((data.wind?.speed ?? 0) * 3.6)}<span class="stat-unit"> km/h</span>`;
+    document.getElementById("minmax").textContent =
+      `${Math.round(data.main?.temp_min)}° / ${Math.round(data.main?.temp_max)}°`;
+  }
+
+  async function buscarPrevisao(cidade) {
+    try {
+      const res = await fetch(`${API_BASE}/api/previsao?cidade=${encodeURIComponent(cidade)}`);
+      if (!res.ok) { renderForecastFallback(); return; }
+      const data = await res.json();
+      if (!data.list) { renderForecastFallback(); return; }
+
+      // pega 1 entrada por dia (ao meio-dia)
+      const porDia = {};
+      for (const item of data.list) {
+        const d = new Date(item.dt * 1000);
+        const key = d.toDateString();
+        const hora = d.getHours();
+        if (!porDia[key] || Math.abs(hora - 12) < Math.abs(new Date(porDia[key].dt*1000).getHours() - 12))
+          porDia[key] = item;
+      }
+
+      const proximos = Object.values(porDia).slice(1, 6);
+      const row = document.getElementById("forecast-row");
+      row.innerHTML = "";
+      proximos.forEach(item => {
+        const d = new Date(item.dt * 1000);
+        const card = document.createElement("div");
+        card.className = "forecast-card";
+        card.innerHTML = `
+          <div class="forecast-day">${dias[d.getDay()]}</div>
+          <div class="forecast-icon">${iconePorCodigo(item.weather?.[0]?.icon)}</div>
+          <div class="forecast-temp">${Math.round(item.main?.temp)}°C</div>
+          <div class="forecast-desc">${item.weather?.[0]?.description ?? ""}</div>
+        `;
+        row.appendChild(card);
+      });
+    } catch {
+      renderForecastFallback();
+    }
+  }
+
+  function renderForecastFallback() {
+    const row = document.getElementById("forecast-row");
+    row.innerHTML = `<p style="color:var(--muted);font-size:13px;grid-column:1/-1">
+      Adicione o endpoint <code style="color:var(--accent)">/api/previsao</code> à sua API para exibir a previsão dos próximos dias.
+    </p>`;
+  }
+
+  // busca ao pressionar Enter
+  document.getElementById("input-cidade").addEventListener("keydown", e => {
+    if (e.key === "Enter") buscarClima();
+  });
+</script>
+</body>
+</html>
