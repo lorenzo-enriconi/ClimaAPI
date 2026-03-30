@@ -350,6 +350,8 @@
   </div>
 
 <script>
+
+
   const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
   const weatherIcons = {
@@ -384,7 +386,7 @@
     document.getElementById("dashboard").style.display = "none";
 
     try {
-      const res = await fetch(`${API_BASE}/api/clima?cidade=${encodeURIComponent(cidade)}`);
+      const res = await fetch(`https://climaapi-l1bz.onrender.com/api/clima?cidade=${encodeURIComponent(cidade)}`);
       const data = await res.json();
 
       if (data.erro_externo || data.erro_fatal) {
