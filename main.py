@@ -3,11 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-proxy = "http://lorenzo-enriconi:Sexta04042003$@proxyprx.ipesaude.intra.rs.gov.br:3128"
-
-os.environ['HTTP_PROXY'] = proxy
-os.environ['HTTPS_PROXY'] = proxy
-
 app = FastAPI()
 
 app.add_middleware(
