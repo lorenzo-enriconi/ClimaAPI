@@ -1,7 +1,6 @@
 import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 app = FastAPI()
 
@@ -37,13 +36,10 @@ def chamar_api_clima(url: str, cidade: str, parametro_extra: dict | None = None)
     except Exception as e:
         return {"erro_fatal": str(e)}
     
-
-
-
+    
 @app.get("/api/previsao")
 def obter_previsao(cidade: str):
     return chamar_api_clima(BASE_URL, cidade)
-
 
 
 @app.get("/api/clima")
