@@ -422,7 +422,7 @@
     document.getElementById("humidity").innerHTML = `${data.main?.humidity}<span class="stat-unit">%</span>`;
     document.getElementById("wind").innerHTML = `${Math.round((data.wind?.speed ?? 0) * 3.6)}<span class="stat-unit"> km/h</span>`;
     document.getElementById("minmax").textContent =
-      `${Math.round(data.main?.temp_min)}° / ${Math.round(data.main?.temp_max)}°`;
+      `${Math.round(data.main?.daily.temp.min)}° / ${Math.round(data.main?.daily.temp.max)}°`;
   }
 
   async function buscarPrevisao(cidade) {
