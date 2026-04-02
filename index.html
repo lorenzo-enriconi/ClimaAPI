@@ -391,7 +391,7 @@
     document.getElementById("dashboard").style.display = "none";
 
     try {
-      const res = await fetch(`${API_BASE}=${encodeURIComponent(cidade)}`);
+      const res = await fetch(`${API_BASE}/api/clima?cidade=${encodeURIComponent(cidade)}`);
       const data = await res.json();
 
       if (data.erro_externo || data.erro_fatal) {
@@ -427,7 +427,7 @@
 
   async function buscarPrevisao(cidade) {
     try {
-      const res = await fetch(`${API_BASE}=${encodeURIComponent(cidade)}`);
+      const res = await fetch(`${API_BASE}/api/previsao?cidade=${encodeURIComponent(cidade)}`);
       if (!res.ok) { renderForecastFallback(); return; }
       const data = await res.json();
       if (!data.list) { renderForecastFallback(); return; }
